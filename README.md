@@ -11,7 +11,7 @@ A complete mini-project for binary classification of **cropped facial images** a
 | `cacd_auth.tar.gz` | Final test real | 5,063 |
 | `cacd_deepfake.tar.gz` | Final test fake (face swaps) | 3,756 |
 
-The original dataset README is in `docs/DATASET_README.md`. The original project synopsis is in `docs/synopsis.docx`. **The synopsis currently names FaceForensics++ as its data source; revise that section before submission because these supplied archives are CelebDF/CACD based.** It also describes unseen dataset generalization; the CACD result is one cross-source test, not a guarantee of broad generalization. The dataset README's identity count does not match the folder counts (57 training folders, 47 test folders).
+The original dataset README is in `docs/DATASET_README.md`. The original project synopsis is in `docs/synopsis.docx`. It also describes unseen dataset generalization; the CACD result is one cross-source test, not a guarantee of broad generalization. 
 
 ## Setup
 
@@ -52,31 +52,13 @@ To predict an **already cropped face** after training:
 python predict.py --image path/to/cropped_face.jpg --checkpoint outputs/mobilenet_v3/best.pt
 ```
 
-## Deploy a web demo
-
-First train and evaluate a model. Pick one model using its validation results, then run:
-
-```bash
-python package_deployment.py --model mobilenet_v3
-```
-
-This creates `DeepFake_Deployment_mobilenet_v3.zip` with a **standalone Streamlit app and the trained checkpoint**. Extract that ZIP and run it locally:
-
-```bash
-cd deployment_ready
-python -m pip install -r requirements.txt
-streamlit run app.py
-```
-
-To publish, upload the **extracted deployment ZIP contents**, including `model/best.pt`, to the root of a new GitHub repository. Go to [Streamlit Community Cloud](https://share.streamlit.io/), choose **Create app**, select your repository and branch, set the entrypoint to `app.py`, choose Python 3.11 or 3.12 in Advanced settings, and deploy. The hosted demo is CPU only by default and may be slower than local GPU inference. Do **not** upload the four training archives or extracted images to the deployment repository. The app handles cropped face uploads in memory and does not deliberately persist them. Check the service's privacy terms before uploading personal photos.
-
 Outputs for each model appear in `outputs/<model>/`: `best.pt`, `history.csv`, `test_metrics.json`, `confusion_matrix.png`, and `roc_curve.png`. Report accuracy, specificity, fake-class precision/recall/F1, ROC-AUC, confusion matrix, model complexity (parameter count, if desired), and batch-amortized inference time. The included time measure includes image loading/preprocessing and device transfers; it is **not** single-image latency. Compare timings only on the same hardware and batch size.
 
 ## Split and interpretation
 
-`prepare.py` extracts the archives once and writes `data/splits.csv`. The five source videos for each training identity are split at the **video** level (one for validation, four for training), with each original image and its matching reconstruction assigned together. All CACD images stay in the test split. Validation is balanced between real and fake because train frames have a paired reconstruction; CACD is mildly imbalanced, so inspect precision, recall, F1, AUC, and the confusion matrix as well as accuracy.
+`prepare.py` extracts the archives once and writes `data/splits.csv`. The five source videos for each training identity are split at the video level (one for validation, four for training), with each original image and its matching reconstruction assigned together. All CACD images stay in the test split. Validation is balanced between real and fake because train frames have a paired reconstruction; CACD is mildly imbalanced, so inspect precision, recall, F1, AUC, and the confusion matrix as well as accuracy.
 
-This dataset tests reconstruction-trained models against face swaps from another image source. It does not establish robustness to arbitrary generators, diffusion images, unseen identities, or uncropped photographs. The supplied test identities overlap the training identities (47 of 57), so this is a **cross-source/manipulation** evaluation, not an unseen-identity evaluation. Face crops are low resolution; upscaling to 224 pixels does not add detail. The originals and reconstructions may have aligned content, so group membership and paired examples must remain together. Check your institution's usage and citation requirements for the dataset and paper in `docs/DATASET_README.md`.
+This dataset tests reconstruction-trained models against face swaps from another image source. It does not establish robustness to arbitrary generators, diffusion images, unseen identities, or uncropped photographs. The supplied test identities overlap the training identities (47 of 57), so this is a cross-source/manipulation evaluation, not an unseen-identity evaluation. Face crops are low resolution; upscaling to 224 pixels does not add detail. The originals and reconstructions may have aligned content, so group membership and paired examples must remain together. Check your institution's usage and citation requirements for the dataset and paper in `docs/DATASET_README.md`.
 
 ## Files
 
